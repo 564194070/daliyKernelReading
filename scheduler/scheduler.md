@@ -78,17 +78,23 @@
 - Linux中有很多优先调度类，他们可以组合成一个链表，下一级优先调度类
 
 # 1.3调度类（优先级从高到低）
-每一个进程对应一种调度策略，每一个调度策略对应一个调度类
-每个调度类可以对应多个调度策略，每个调度策略可以对应多个进程
+Linux 选择调度类的优先级顺序
+源码位置: /kernel/sched/sched_
+- 每一个进程对应一种调度策略，每一个调度策略对应一个调度类
+- 每个调度类可以对应多个调度策略，每个调度策略可以对应多个进程
+
 
 1. stop\_sched\_class
 2. dl\_sched\_class 
-3. rt\_sched\_class 
+3. rt\_sched\_class (FIFO RR)
 - 实时调度器:以优先级为导向，选择优先级最高的进程运行
-4. fair\_sched\_class 
+4. fair\_sched\_class (NORMAL BATCH)
+- 完全公平调度器:
 5. idle\_sched\_class 
 
 # 1.4 调度策略
+优先级从高至底
+影响下一个进程的选择 \*pick\_next\_task
 1. SCHED\_DEADLINE
 2. SCHED\_FIFO
 3. SCHED\_RR
