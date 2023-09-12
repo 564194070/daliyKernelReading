@@ -78,12 +78,16 @@
 - Linux中有很多优先调度类，他们可以组合成一个链表，下一级优先调度类
 
 # 1.3调度类
+每一个进程对应一种调度策略，每一个调度策略对应一个调度类
+每个调度类可以对应多个调度策略，每个调度策略可以对应多个进程
 
-1. dl\_sched\_class 
-2. rt\_sched\_class 
-3. fair\_sched\_class 
-4. idle\_sched\_class 
-5. stop\_sched\_class
+1. stop\_sched\_class
+2. dl\_sched\_class 
+3. rt\_sched\_class 
+4. fair\_sched\_class 
+5. idle\_sched\_class 
+
+
 # 2.完全公平调度器CFS
 
 
