@@ -25,23 +25,26 @@
 01. const struct sched\_class \*next  
 - 系统中有多个调度类，按照优先级排成了一个链表，下一个优先级调度类，就是指针指向
 02. void (\*enqueue\_task) (struct rq \*rq, struct task\_struct \*p, int flags)
-- 将进程加入到执行队列中去，将进程实体(PCB控制块 task\_struct) 存放到红黑树当中(rq) 并对nr\_running变量自动+1
+- 将进程加入到就绪队列中去，将进程实体(PCB控制块 task\_struct) 存放到红黑树当中(rq) 并对nr\_running变量自动+1
 - 一个task变为就绪状态，希望挂在调度器就绪队列上(rq)
 03. void (\*dequeue\_task) (struct rq \*rq, struct task\_struct \*p, int flags)
-- 从执行队列删除进程 并且对nr\_running变量自动-1
+- 从执行队列删除进程 并且对nr\_running变量自动-1 将调度实体从红黑树中移除
 - 一个task阻塞等待输入，不能继续停留在调度器就绪队列了，要离开
+- 某个task推出可运行状态时也会调用
 04. void (\*yield\_task) (struct rq \*rq)
 - 放弃CPU执行权，该函数执行先出队再入队，直接将调度实体(进程)放到红黑树最右端
-- 跳过当前任务
+- 跳过当前任务,进程想要放弃对处理器的控制权
 05. bool (\*yield\_to\_task) (struct rq \*rq, struct task\_struct \*p, bool preempt)
 - 跳过当前任务，并且尽量调度任务p
 06. void (\*check\_preempt\_curr) (struct rq \*rq, struct task\_struct, int flags)
 - 这个函数在有任务被唤醒的时候调用，看看能不能抢占当前调用
 - 当前进程可否被新进程抢占
+- 完成抢占之前CFS会进行公平性测试
 07. struct task\_struct \* (\*pick\_next\_task) (struct rq \*rq, struct task\_struct \*prev)
 - 选择下一个就绪要运行的进程
 08. void (\*put\_prev\_task) (struct rq \*rq, struct task\_struct\*p)
 - 将进程放回到运行队列当中去
+- 用于另一个进程代替当前运行进程
 09. int (\*select\_task\_rq) (struct task\_struct\*p, int task\_cpu, int sd\_flag, int flags)
 - 为进程选择一个合适的CPU
 10. void (\*migrate\_task\_rq) (struct task\_struct \*p)
