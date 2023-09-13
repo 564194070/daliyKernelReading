@@ -29,7 +29,7 @@ task\_struct 进程管理和调度的核心数据结构,和多个其他子系统
 - cpumask\_t cpus\_allowed
 - #ifdef CONFIG\_PREEMPT\_RCU RCU同步原语
 - struct list\_head tasks 进程架构链表
-- struct mm\_struct \*mm, \*active_mm 进程管理进程地址空间，每个进程有独立地址空间，指向进程地址空间i
+- struct mm\_struct \*mm, \*active\_mm 进程管理进程地址空间，每个进程有独立地址空间，指向进程地址空间i
 - task state 进程状态参数 
 - int pdeath\_signal 接收父进程终止时，就会发出信号
 - pid\_t pid 进程的PID
@@ -67,8 +67,23 @@ task\_struct 进程管理和调度的核心数据结构,和多个其他子系统
 
 
 
+# 1.3 优先级
 
+调度器，分配CPU的基本依据，就是优先级，根据任务性质不同，程序可以有不同的优先级
+数字越小，优先级越高
 
+源码位置: /include/linux/sched/prio.h
+三个成员表示进程优先级:
+- prio 动态优先级
+- normal\_prio 动态优先级(归一化优先级)
+- static\_prio 静态优先级
+
+1. 实时进程优先级(操作系统创建): 0-MAX\_RT\_PRIO-1 (0-99)
+- 优先级高，需要立刻被执行，不能被普通进程阻挡
+2. 普通进程优先级(用户创建): MAX\_RT\_PRIO-MAX\_PRIO-1 (100-139)
+- 优先级低，更长执行时间的进程
+- 互动进程
+- 批处理进程
 
 
 
