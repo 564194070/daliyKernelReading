@@ -108,18 +108,27 @@ Linux 选择调度类的优先级顺序
 
 # 1.4 调度策略
 优先级从高至底
-影响下一个进程的选择 \*pick\_next\_task
+源码: /include/uapi/linux/sched.h
+影响下一个进程的选择 \*pick\_next\_task, 进程中使用unsigned int policy保存进程调度策略
+
+
 1. SCHED\_DEADLINE   6
+- 实时进程调度策略，针对突发性计算。时间高敏感度。
 2. SCHED\_FIFO	     1	
+- 先入先出调度算法，实时调度策略，先到先服务，高优先级任务可以直接抢占低优先级任务
 3. SCHED\_RR         2
+- 轮流调度算法，实时调度策略，采用时间片，相同优先级的任务执行完放到尾部队列保证公平，高优先级会抢占低优先级任务
 4. SCHED\_NORMAL     0
+- 普通进程调度策略，使用CFS调度器实现
 5. SCHED\_BATCH      3
+- SCHED\_NORMAL分化版本，采用分时测率实现，根据动态优先级，分配CPU运行资源
+- 非交互处理器，消耗性进程
 6. SCHED\_IDLE       5
+- 优先级最低，系统空闲的时候，才运行该类进程
 7. SCHED\_ISO        4
 
 # 1.5 Linux调度顺序
 Linux 调度核心选择下一个合适的task运行时，会按照优先级顺序遍历调度类的pick\_next\_task函数。
 
-# 2.完全公平调度器CFS
 
 
