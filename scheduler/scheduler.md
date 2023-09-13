@@ -79,28 +79,46 @@
 
 # 1.3调度类（优先级从高到低）
 Linux 选择调度类的优先级顺序
-源码位置: /kernel/sched/sched_
+源码位置: /kernel/sched/sche\_task
 - 每一个进程对应一种调度策略，每一个调度策略对应一个调度类
 - 每个调度类可以对应多个调度策略，每个调度策略可以对应多个进程
-
+- 更具需求，将不同的任务放到不同的调度类当中
 
 1. stop\_sched\_class
+- 优先级最高的线程，会中断所有其他线程，而且不会被其他任务打断 
+- 不能被抢占不能被切换，不会主动yield,直到run出CPU
+- (stop\_task)
 2. dl\_sched\_class 
+-
+- deadline
 3. rt\_sched\_class (FIFO RR)
 - 实时调度器:以优先级为导向，选择优先级最高的进程运行
+- 作用于实时线程
+- rt
+- SCHED\_RR SCHED\_FIFO 关联
 4. fair\_sched\_class (NORMAL BATCH)
-- 完全公平调度器:
+- 完全公平调度器(CFS): 管理一般常规线程
+- fair
+- SCHED\_NORMAL SCHED\_BATCH SCHED\_IDLE 相关联
 5. idle\_sched\_class 
+- 静态线程调度器
+- 每个CPU第一个PID=0的线程，swapper是一个静态线程，一般会在开机和CPU异常的时候做DUMP
+- idle\_task
+
 
 # 1.4 调度策略
 优先级从高至底
 影响下一个进程的选择 \*pick\_next\_task
-1. SCHED\_DEADLINE
-2. SCHED\_FIFO
-3. SCHED\_RR
-4. SCHED\_NORMAL
-5. SCHED\_BATCH
-6. SCHED\_IDLE
+1. SCHED\_DEADLINE   6
+2. SCHED\_FIFO	     1	
+3. SCHED\_RR         2
+4. SCHED\_NORMAL     0
+5. SCHED\_BATCH      3
+6. SCHED\_IDLE       5
+7. SCHED\_ISO        4
+
+# 1.5 Linux调度顺序
+Linux 调度核心选择下一个合适的task运行时，会按照优先级顺序遍历调度类的pick\_next\_task函数。
 
 # 2.完全公平调度器CFS
 
