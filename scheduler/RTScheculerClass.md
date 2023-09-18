@@ -59,5 +59,20 @@
 - 从优先级队列中删除实时进程，更新调度信息，将进程添加到队尾
 - static void dequeue\_task\_rt (struct rq \*rq , struct task\_struct \*p, int flags)
 - update\_curr\_rt(rq) 更新调度信息
-- dequeue\_rt\_entity(rt\_se)
-- dequeue\_pushable\_task(rq, p)
+- dequeue\_rt\_entity(rt\_se) 将re\_se从运行队列中删除，然后添加到队列尾部
+- dequeue\_pushable\_task(rq, p) 从hash表中进行删除
+
+6. static void update\_curr\_rt (struct rq \*rq)
+- 更新进程调度信息
+- if (curr-> sched\_class != &rt\_sched\_class) 判断是否有实时调度进程
+- delta\_exec = rq\_clock\_task(rq) - curr-> se.exec\_start 执行时间
+- schedstat\_set 
+- curr-> se.sum\_exec\_runtime += delta\_exec 更新当前总进程信息
+- curr-> se.exec\_start 更新执行开始时间
+
+7. static void dequeue\_rt\_entity (struct sched\_rt\_entity \*rt\_se) 
+- dequeue\_rt\_stack (rt\_se) 从运行队列中删除
+- \_\_enqueue\_rt\_entity(et\_se, flase) 将运行实体添加到队尾
+
+8. static void \_\_dequeue\_rt\_entity(struct sched\_rt\_entity \*rt\_se)
+
