@@ -83,6 +83,12 @@ Linux 选择调度类的优先级顺序
 - 每一个进程对应一种调度策略，每一个调度策略对应一个调度类
 - 每个调度类可以对应多个调度策略，每个调度策略可以对应多个进程
 - 更具需求，将不同的任务放到不同的调度类当中
+- SCHED\_OTHER 分时调度策略 SCHED\_FIFO 实时调度策略 先到先服务 SCHED\_RR 实时调度策略，时间片轮转
+调度算法:
+- CFS: OTHER IDLE
+- EDF DEADLINE
+- RT RR  FIFO
+
 
 1. stop\_sched\_class
 - 优先级最高的线程，会中断所有其他线程，而且不会被其他任务打断 
@@ -116,7 +122,7 @@ Linux 选择调度类的优先级顺序
 - 实时进程调度策略，针对突发性计算。时间高敏感度。
 2. SCHED\_FIFO	     1	
 - 先入先出调度算法，实时调度策略，先到先服务，高优先级任务可以直接抢占低优先级任务
-- 无时间片，被调度器选择后，可以执行任意时长
+- 无时间片，被调度器选择后，可以执行任意时长，直到更高优先级任务出现
 3. SCHED\_RR         2
 - 轮流调度算法，实时调度策略，采用时间片，相同优先级的任务执行完放到尾部队列保证公平，高优先级会抢占低优先级任务
 - 有时间片，其值在运行时会减少
@@ -133,4 +139,39 @@ Linux 选择调度类的优先级顺序
 Linux 调度核心选择下一个合适的task运行时，会按照优先级顺序遍历调度类的pick\_next\_task函数。
 
 
+## 1.6进程优先级
+## 1.7调度策略
+Linux内核的三种调度策略
+1. SCHED\_OTHER
+- 分时调度策略
+- Linux系统创建默认线程时，选择SCHED\_OTHER
+2. SCHED\_FIFO
+- 实时调度策略，先到先服务，除非高优先级来，不然一直到运行结束
+3. SCHED\_RR
+- 实时调度策略，时间片轮转
 
+1. SCHED\_OTHER不支持优先级使用
+- SCHED\_NORMOL SCHED\_BATCH SCHED\_IDLE 始终返回0，普通函数任务调度函数
+2. SCHED\_FIFO SCHED\_RR 支持优先级
+- 使用1-99 数值越大，优先级越低
+优先级+nice度，决定进程运行时长
+
+### 1.7.1 RR/FIFO
+- 属于实时任务，创建时优先级大于0(1-99) 
+- 按照抢占优先级调度算法进行，就绪态实时任务，立刻抢占非实时任务。
+### 1.7.2 OTHER
+- 会根据nice值确定在CPU上的执行时间
+- 没有资源等待，会将任务加入到就绪队列中
+- 调度程序遍历就绪队列中的任务，根据动态优先级计算，选择结果最大的运行
+- 如果就绪队列所有计算任务，计算权值都不大于0，根据每个任务nice度，再分配CPU时间
+### 1.7.3 使用函数获取线程最高和最低优先级
+- int sched\_get\_priority\_max(int policy) //获取实时优先级最大值
+- int sched\_get\_priority\_min(int policy) //获取实时优先级最小值
+### 1.7.4 使用函数设置或获取优先级
+- int pthread\_attr\_setschedparam(pthread\_attr\_t \* attr, const struct sched\_param \*param)	//创建线程的优先级
+- int pthread\_attr\_getschedparam(pthread\_attr\_t \* attr, const struct sched\_param \*param) //获得线程的优先级
+- param.sched\_priority=10 //设置优先级
+### 1.7.5 设置线程调度策略
+- int pthread\_attr\_setschedpolicy // 设置线程调度策略
+- struct sched\_param 
+- int \_\_sched\_priority 所有设定线程的优先级
