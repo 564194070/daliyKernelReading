@@ -83,19 +83,38 @@ RCU的保护对象
 
 ### 1.6.2 常见内核RCU写者操作
 1. rcu\_assign\_pointer
-写者用它进程removal操作
-写者完成新版数据分配和更新之后，调用这个函数使得RCU protected pointer指向RCU protected data
+- 写者用它进程removal操作
+- 写者完成新版数据分配和更新之后，调用这个函数使得RCU protected pointer指向RCU protected data
 2. synchronize\_rcu
-写者操作可以是同步的
-完成更新操作后，调用它等待旧版本数据上的线程离开临界区
-该函数返回，证明旧的共享数据没有任何引用了，可以直接reclamation操作
+- 写者操作可以是同步的
+- 完成更新操作后，调用它等待旧版本数据上的线程离开临界区
+- 该函数返回，证明旧的共享数据没有任何引用了，可以直接reclamation操作
 3. call\_rcu 
-写者无法阻塞，该函数注册callback直接返回
-适当时机，调用callback，完成reclamation
+- 写者无法阻塞，该函数注册callback直接返回
+- 适当时机，调用callback，完成reclamation
 4. removal
-为了让写者进入，首先要移除读者访问，创建副本使读者访问副本
-创建一个新的副本,共享数据进行数据更新
+- 为了让写者进入，首先要移除读者访问，创建副本使读者访问副本,创建一个新的副本,共享数据进行数据更新
+- write分配一个new version共享数据进行更新，更新完毕后，将RCU protect pointer指向新版本数据， 用户直接访问新的数据，读者对共享数据引用被删除，访问旧版本数据
 5. reclamation
-共享数据不能有两个版本，适当时间要收回旧版本，read不访问了，旧收回旧共享空间
+- 共享数据不能有两个版本，适当时间要收回旧版本，read不访问了，旧收回旧共享空间
+
+### 1.6.3 常见内核RCU读者操作
+1. rcu\_read\_lock
+- 标识RCU readside 临界区开始
+2. rcu\_dereference
+- 获取RCU protect pointer 访问共享数据
+3. rcu\_read\_unlock
+- 标识reader离开 RCU readside 临界区
 
 
+## 1.7 RCU层次结构
+RCU按照CPU数量大小组织层次结构，RCU Hierachy
+源码 /kernel/rcu/tree.h
+1. CONFIG\_RCU\_FANOUT\_LEAF
+- 标识一个子叶子的CPU数量
+2. CONFIG\_RCU\_FANOUT
+- 每层最多支持的叶子数量
+
+level 0: 包含1个struct rcu\_node
+level 1: 被level 0 的struct rcu\_node 管理
+level 2: 被一个struct\_node 管理16个CPU独立的struct rcu\_data数据结构
