@@ -65,15 +65,37 @@ RCU ReadLock允许多个线程读一个链表，同时允许修改链表
 ## 1.6RCU内核操作
 源码位置: /include/linux/reclist.h
 RCU的保护对象
-1. 保护一般指针指向的数据
-2. 保护双链表
+- 保护一般指针指向的数据
+- 保护双链表
 - 遍历、修改、删除链表元素，需要使用RCU变体，标准函数后加\_rcu后缀
 
-- static inline void list\_add\_rcu (struct list\_head \* new, struct list\_head \* head)
-- static inline void list\_add\_tail\_rcu(struct list\_head \* new, struct list\_head \* head)
-- static inline void list\_del\_rcu(struct list\_head \* entry)
-- static inline void list\_replace\_rcu(struct list\_head \*old, struct list\_head \*new)
+### 1.6.1 常见内核RCU链表操作
+1. static inline void list\_add\_rcu (struct list\_head \* new, struct list\_head \* head)
+- 将新的链表元素new添加到表头为head的链表头部
+2. static inline void list\_add\_tail\_rcu(struct list\_head \* new, struct list\_head \* head)
+- 将新的链表元素new添加到表头为head的链表尾部
+3. static inline void list\_del\_rcu(struct list\_head \* entry)
+- 从链表中删除元素entry
+4. static inline void list\_replace\_rcu(struct list\_head \*old, struct list\_head \*new)
+- 使用新元素替换链表中的旧元素
+5. list\_each\_rcu
+- 遍历链表
 
-
+### 1.6.2 常见内核RCU写者操作
+1. rcu\_assign\_pointer
+写者用它进程removal操作
+写者完成新版数据分配和更新之后，调用这个函数使得RCU protected pointer指向RCU protected data
+2. synchronize\_rcu
+写者操作可以是同步的
+完成更新操作后，调用它等待旧版本数据上的线程离开临界区
+该函数返回，证明旧的共享数据没有任何引用了，可以直接reclamation操作
+3. call\_rcu 
+写者无法阻塞，该函数注册callback直接返回
+适当时机，调用callback，完成reclamation
+4. removal
+为了让写者进入，首先要移除读者访问，创建副本使读者访问副本
+创建一个新的副本,共享数据进行数据更新
+5. reclamation
+共享数据不能有两个版本，适当时间要收回旧版本，read不访问了，旧收回旧共享空间
 
 
