@@ -33,6 +33,10 @@ MAINTAINERS: 目前维护者列表
 Makefile:编译内核的主要文件
 
 ## 2.Linux操作系统结构
+Linux内核时操作系统的一部分，对下管理系统所有硬件设备，对上通过系统调用向Library Runtime(C语言库)或者其他程序提供API接口
+内核的作用，承上启下。管理硬件设备，提供给应用程序使用
+application -> library routine -> kernel -> hardware
+![](./png/LinuxModule.PNG)
 
 1. 进程调度:
 - 控制进程对CPU的访问,在选择下一个需要运行的程序时，选择优先级最高的进程
