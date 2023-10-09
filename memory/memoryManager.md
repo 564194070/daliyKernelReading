@@ -52,7 +52,21 @@ meminfo参数
 - vmalloc 使用虚拟地址空间
 - 非规范区域
 
-2. 用户空间
+2. 内核空间详解
+源码地址 arch/arm64/include/memory.h
+FFFF FFFF FFFF FFFF 线性映射区域 (PAGE\_OFFSET = 0xFFFF FFFF FFFF FFFF <<(VA\_BITS-1))
+                    vmemmap区域 (VMEMMAP\_START = PAGE\_OFFSET - VMEMMAP\_SIZE)
+                    2MB间隙
+                    PCI I/O区域(16MB) (PCI\_IO\_END = VMEMMAP\_START - SZ\_2M) (PCI\_IO\_START = PCI\_IO\_END - SZ\_16M)
+                    2MB间隙     （FIXADDR\_TOP = PCI\_IO\START - SZ\_2M）
+                    固定映射区域  (FIXADDR\_START = FIXADDR\_TOP - FIXADDR\_SIZE)
+                    间隙         (VMALLOC\_END = PAGE\_OFFSET-PUB\_SIZE-VEMMAP\_SIZE-SZ\_64K)
+                    内核镜像       (KIMAGE\_VADDR+TEXT\_OFFSET)
+                    内核模块区域    (VMALLOC\_START = MODULES\_END = MODULES\_VADDR+SZ\_128M)
+                    KASAN影子区域   (MODULES\_VADDR = VA\_START + KASAN\_SHADOW\_SIZE)
+                                    (VA\_START = 0xFFFF FFFF FFFF FFFF) << VA\_BITS
+KASAN 动态内存错误检查 1/8 内存
+释放后使用和越界两类错误
 
 # 3.内存管理架构
 内存管理子系统可以分为 用户空间、内核空间、硬件部分

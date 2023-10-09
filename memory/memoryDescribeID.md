@@ -51,3 +51,21 @@
 2. 进程的虚拟地址空间由两个数据结构描述，
 - mm\_struct(至高层次): 描述整个用户虚拟地址空间
 - vm\_area\_struct(较高层次): 描述虚拟地址空间的一个区间(虚拟区)
+3. 连接关系
+- task\_struct mm\_struct mm active\_mm
+- mm\_struct struct vm\_area\_struct mmap 
+- vm\_area\_struct struct mm\_struct vm\_mm
+
+
+# 3. vm\_area\_struct
+1. vm\_start 
+- 虚拟内存空间首地址
+2. vm\_end
+- 虚拟内存空间末地址后第一个字节
+3. vm\_next
+- 虚拟空间链表前后成员
+4. vm\_prev
+- 虚拟空间链表前后成员
+5. rb\_node
+- 为了解决链表的搜索问题
+-  mm\_struct中有红黑树，vma\_struct中有红黑树，进程申请内存，先走vma再添加mm\_struct
