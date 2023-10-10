@@ -66,4 +66,21 @@
 - unsigned long vm\_flags 标志位 mm.h
 - VM\_READ VM\_WRITE VM\_EXEC VM\_SHARED ......
 - struct {struct rn\_node rb; unsigned long rb\_subtree\_last} shared 为了支持查询一个文件区间被映射到什么虚拟内存区域。 把一个文件映射到的所有虚拟内存区域，加入到该文件的地址空间结构address\_space的成员i\_mmap指向的区间树。
+
+- struct list\_head anon\_vma\_chain 把所有虚拟内存区域关联的anon\_vma实例串联起来， 一个虚拟内存区域会关联到父进程的anon\_vma实例和自己的anon\_vma实例。
+- struct anon\_vma *anon\_vma 指向anon\_vma实例，组织匿名页被映射到的所有虚拟地址空间
+- const struct vm\_operations\_struct  *vm\_ops 虚拟内存操作集合 (mm.h)
+- unsigned long vm\_pgoff 文件的偏移，单位是页
+- struct file *vm\_file 私有匿名映射，该成员是空指针
+- void * vm\_private\_data 指向内存区的私有成员
+
+## 3.2 vm\_operations\_struct
+- open 创建虚拟内存时调用open方法
+- close 删除虚拟内存区域时调用close
+- mremap 使用系统调用mremap移动虚拟内存区域
+- fault 访问文件映射的虚拟页，没有映射到物理页形成缺页，异常处理调用这个。将文件数据读到页缓存当中
+- huge_fault 针对使用透明巨型页的文件映射
+- map\_page 读文件映射虚拟页，没有映射物理页，生成缺页异常，除了正在访问的文件页，还会预读后续文件页。该方法在文件的页缓存中分配物理页
+- page\_mkwrite 第一次写私有文件映射发生错误时的问题，执行写时复制，调用该方法通知文件系统，页即将变成可写状态
+
 # 4.系统调用
