@@ -46,12 +46,24 @@
 
 
 ## 2.2 线程启动映射过程
-在虚拟地址空间（mm_struct）创建一个虚拟映射区域（vm_area_struct）
-mmap在进程当前的虚拟地址空间当中，空闲连续虚拟地址空间作为内存虚拟映射地址区域，初始化并插入进程虚拟地址区域的链表
-内核创建文件物理地址和内存虚拟地址之间的映射关系
-进程读写访问操作虚拟地址，对堆发起访问。查询页表，发现内容不在内存这块物理页面上(映射关系有了，但是内容没移动)，
-换页过程
-查询页表发现内存不在内存，先找swap，没有就nopage，把缺页从磁盘调入内存，进行读写操作，一段时间后系统回写脏页到磁盘
-msync 强制同步写入文件
+
+- 在虚拟地址空间（mm_struct）创建一个虚拟映射区域（vm_area_struct）
+- mmap在进程当前的虚拟地址空间当中，空闲连续虚拟地址空间作为内存虚拟映射地址区域，初始化并插入进程虚拟地址区域的链表
+- 内核创建文件物理地址和内存虚拟地址之间的映射关系
+- 进程读写访问操作虚拟地址，对堆发起访问。查询页表，发现内容不在内存这块物理页面上(映射关系有了，但是内容没移动)，
+- 换页过程
+- 查询页表发现内存不在内存，先找swap，没有就nopage，把缺页从磁盘调入内存，进行读写操作，一段时间后系统回写脏页到磁盘
+- msync 强制同步写入文件
+
 # 3.数据结构
+## 3.1 vm\_area\_struct
+源码: include/linux/mm_types.h
+虚拟内存区域分配给进程一个虚拟地址范围，内核使用结构体vm\_area\_struct描述虚拟内存区域 
+
+- task\_struct(struct mm\_struct *mm) -> mm\_struct(struct vm\_area\_struct *mmap) -> vm\_area\_struct
+- struct mm\_struct *vm\_mm 指向内存描述符，虚拟内存区域所属用户虚拟地址空间
+- pgprot\_t vm\_page\_prot 保护位，访问权限相关
+- unsigned long vm\_flags 标志位 mm.h
+- VM\_READ VM\_WRITE VM\_EXEC VM\_SHARED ......
+- struct {struct rn\_node rb; unsigned long rb\_subtree\_last} shared 为了支持查询一个文件区间被映射到什么虚拟内存区域。 把一个文件映射到的所有虚拟内存区域，加入到该文件的地址空间结构address\_space的成员i\_mmap指向的区间树。
 # 4.系统调用
