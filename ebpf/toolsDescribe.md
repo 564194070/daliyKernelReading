@@ -51,7 +51,30 @@
 - 对线程等待CPU运行时间统计
 - 定位超出预期的CPU等待时间
 
-## 1.11
+## 1.11profile
 
 - CPU剖析器，什么代码消耗了CPU资源
 - 周期性采样，然后打印
+
+## 1.12funccount
+
+- 对函数调用进行计数
+
+## 1.13stackcount
+
+- 对引发某事件的函数栈进行计数
+- 火焰图
+- stackcount -f -P -D 10 ktime_get > out.count.txt
+- git clone http://github.com/brendangregg/FlameGraph
+- cd FlameGraph
+- ./flamegraph.pl --hash --bgcolors=grey < ./out.count.txt > test.svg
+
+## 1.14trace
+
+- 定制化打印事件细节信息
+- trace 'do_sys_open "%s", arg2'
+- 显示第X个参数
+
+## 1.15argdist
+
+- 统计事件参数分布

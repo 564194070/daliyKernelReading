@@ -50,6 +50,7 @@
 - bpf\_get\_current\_cgroup\_id 返回当前的cgroupID
 - bpf\_spin\_lock
 - bpf\_spin\_unlock 对网络程序的并发控制
+- bpf\_trace\_printk 向/sys/kernel/debug/tracing/trace\_pipe写数据
 
 # 3.3 BPF系统调用
 - BPF\_MAP\_CREATE
