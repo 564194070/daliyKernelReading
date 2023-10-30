@@ -83,4 +83,31 @@
 - map\_page 读文件映射虚拟页，没有映射物理页，生成缺页异常，除了正在访问的文件页，还会预读后续文件页。该方法在文件的页缓存中分配物理页
 - page\_mkwrite 第一次写私有文件映射发生错误时的问题，执行写时复制，调用该方法通知文件系统，页即将变成可写状态
 
+# 3.3文件映射虚拟内存区域
+vm\_area_struct  vm_file -> file -> inode
+                 vm_ops -> vm_\_operations\_struct
+
 # 4.系统调用
+
+- mmap malloc大于128K内存的时候
+- brk malloc小于128K内存的时候
+- 应用程序，使用C标准库提供的函数malloc申请内存，glibc内存分配器ptmalloc使用brk或者mmap向内核以页为单位申请虚拟内存，然后把页划分成小内存给应用使用
+- 两个进程通过映射普通文件，实现共享内存通信
+
+## 4.1 mmap()创建内存映射
+- \#include<sys/mman.h>
+1. void* mmap(void *addr, size_t length, int prot, int flags, int fd, off_t off_set) 创建函数映射
+- 进程创建匿名内存映射,将内存物理页映射到进程虚拟地址空间。
+- 进程把文件映射到虚拟地址空间，可以向访问内存一样访问文件，不需要系统调用read/write,避免了用户态和内核态的切换，提高了读写速度。
+- 两个进程对同一个文件创建了内存映射，实现了内存共享
+
+2. int munmap(void *addr, size_t len)
+- 删除内存映射
+
+3. int mprotect(void *addr, size_t len, int prot)
+- 设置虚拟内存区域的访问权限
+
+4. mmap内存映射原理三个阶段
+- 进程启动映射过程，在虚拟地址空间中为映射创建虚拟映射区域
+- 调用内核空间的系统调用函数mmap(不同于用户态，实现文件物理地址和进程虚拟地址的一一映射) 文件描述符到文件。
+- 进程发起对映射空间的访问，引发缺页异常，实现文件内容到物理空间的拷贝
