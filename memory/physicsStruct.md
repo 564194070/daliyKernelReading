@@ -39,6 +39,33 @@
 - remove_vma_list 调用此函数删除所有目标
 
 
-## 3.物理内存组织结构
+## 3.物理内存组织结构'
+### 3.1 组织架构
 - 非一致内存访问 NUMA 内存被划分多个内存结点的多处理器系统，访问内存的时间，取决于处理器和内存的距离
 - 对称多处理器 SMP 一致内存访问，所有处理器访问内存花费的时间是相同的
+- UMA 每个CPU访问内存所需要的时间是一致的
+### 3.2内存模型
+- 处理器角度看到的物理内存分布
+- 平坦内存(Flat) 内存连续无空洞
+- 不连续内存(Discontiguous) 内存有空洞，选这个模型。可以高效处理空洞
+- 稀疏内存(Space) 存在空洞，但是支持热插拔
+### 3.3 三级结构
+- 内存管理子系统三级结构描述物理内存
+- 节点(node plist_data) -> 区域(zone) -> 页(page)
+1. 内存结点
+- NUMA体系，根据处理器和内存距离划分
+- NUMA体系，不连续内存的NUMA系统中,表示比区域级别更高的内存区域
+- 根据物理地址是否连续划分，每块物理地址连续的内存是一个内存结点
+- 源码： include/linux/mmzone.h
+
+- typedef struct pglist_data
+- struct zone node_zoned[MAX_NR_ZONES] 内存区域数组
+- struct zonelist node_zonelists[MAX_NR_ZONES]  备用区域列表
+- int nr_zones  该节点包含内存区域数量
+- ifdef CONFIG_FLAT_NODE_MEM_MAP 除了稀疏内存模型以外
+- struct page* node_mem_map; 页描述符数组
+- struct page_ext *node_page_ext 页的拓展属性
+- unsigned long node_start_pfn //该节点的其实物理页号
+- node_present_pages 物理页总数
+- node_spanned_pages 物理页范围总长度，包括空洞
+- node_id   节点标识符
